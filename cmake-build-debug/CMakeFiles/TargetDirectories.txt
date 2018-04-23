@@ -1,3 +1,0 @@
-/Users/zhangbin/myProjects/learnNet/testEpoll/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/Users/zhangbin/myProjects/learnNet/testEpoll/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/zhangbin/myProjects/learnNet/testEpoll/cmake-build-debug/CMakeFiles/testEpoll.dir
