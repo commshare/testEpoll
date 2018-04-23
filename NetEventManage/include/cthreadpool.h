@@ -50,7 +50,7 @@ private:
     CConditionVar   m_condvar;
     pthread_t*      m_pThreads;
     std::atomic<bool> m_bRun;
-    std::atomic<int> m_nReady; // have start thread
+    std::atomic<int> m_nReady; // have start thread 原子的整形值，代表已经启动了线程
 };
 
 

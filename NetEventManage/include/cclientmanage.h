@@ -24,6 +24,7 @@ public:
         if (iter != m_mapClient.end())
         {
             iter->second->CloseSocket();
+            /*map里清除这个元素 erase*/
             m_mapClient.erase(iter);
         }
     }
@@ -32,6 +33,7 @@ public:
     {
         for (auto& iter : m_mapClient)
             iter.second->CloseSocket();
+        /*做对map做clear*/
         m_mapClient.clear();
     }
 

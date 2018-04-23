@@ -94,12 +94,14 @@ extern int socket_buf_size;
 
 typedef u64_t fd64_t;
 
+/*竟然是自己实现的不可拷贝类 TODO */
 struct not_copy_able_t
 {
 	not_copy_able_t()
 	{
 
 	}
+	/*一旦copy就告警，注意用了const */
 	not_copy_able_t(const not_copy_able_t &other)
 	{
 		assert(0==1);
@@ -157,6 +159,7 @@ struct address_t  //TODO scope id
 		sockaddr_in ipv4;
 		sockaddr_in6 ipv6;
 	};
+	/*union类型，封装ipv4和v6的*/
 	storage_t inner;
 
 	address_t()
@@ -223,7 +226,7 @@ struct tcp_pair_t:not_copy_able_t
 	tcp_info_t local;
 	tcp_info_t remote;
 	u64_t last_active_time;
-	list<tcp_pair_t>::iterator it;
+	list<tcp_pair_t>::iterator it; /*貌似是一个链表？*/
 	char addr_s[max_addr_len];
 	int not_used=0;
 	tcp_pair_t()

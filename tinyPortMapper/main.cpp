@@ -4,7 +4,7 @@
 #include "fd_manager.h"
 
 using  namespace std;
-
+/*unsigned long long 更能代表64位*/
 typedef unsigned long long u64_t;   //this works on most platform,avoid using the PRId64
 typedef long long i64_t;
 
@@ -19,7 +19,6 @@ int enable_udp=0,enable_tcp=0;
 const int listen_fd_buf_size=5*1024*1024;
 address_t local_addr,remote_addr;
 
-int VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV;
 
 
 struct conn_manager_udp_t
@@ -102,11 +101,11 @@ struct conn_manager_tcp_t
 {
 	list<tcp_pair_t> tcp_pair_list;
 	long long last_clear_time;
-	list<tcp_pair_t>::iterator clear_it;
+	list<tcp_pair_t>::iterator clear_it; /*list的迭代器*/
 	conn_manager_tcp_t()
 	{
 		last_clear_time=0;
-		clear_it=tcp_pair_list.begin();
+		clear_it=tcp_pair_list.begin(); /*迭代器初始化*/
 	}
 	int delayed_erase(list<tcp_pair_t>::iterator &it)
 	{
@@ -224,18 +223,20 @@ int event_loop()
 	}
 	if(enable_tcp)
 	{
+        /**/
 		if (bind(local_listen_fd_tcp, (struct sockaddr*) &local_addr.inner, local_addr.get_len()) !=0)
 		{
 			mylog(log_fatal,"[tcp]socket bind failed, %s",strerror(errno));
 			myexit(1);
 		}
-
+        /*后面的数字设最大可pending的tcp 连接数，512已经足够大了*/
 	    if (listen (local_listen_fd_tcp, 512) !=0) //512 is max pending tcp connection,its large enough
 	    {
 			mylog(log_fatal,"[tcp]socket listen failed error, %s",strerror(errno));
 			myexit(1);
 	    }
 
+        /*epoll监听tcp可读*/
 		ev.events = EPOLLIN;
 		ev.data.u64 = local_listen_fd_tcp;
 		int ret = epoll_ctl(epollfd, EPOLL_CTL_ADD, local_listen_fd_tcp, &ev);
@@ -248,6 +249,7 @@ int event_loop()
 
 	if(enable_udp)
 	{
+        /*绑定本地的udp端口*/
 		if (bind(local_listen_fd_udp, (struct sockaddr*) &local_addr.inner, local_addr.get_len()) == -1)
 		{
 			mylog(log_fatal,"[udp]socket bind error");
@@ -271,9 +273,9 @@ int event_loop()
 	for (;;)
 	{
 		int nfds = epoll_wait(epollfd, events, max_events, 180 * 1000); //3mins
-		if (nfds < 0)
+		if (nfds < 0) /*失败*/
 		{
-			if(errno==EINTR  )
+			if(errno==EINTR  ) /*被中断*/
 			{
 				mylog(log_info,"epoll interrupted by signal,continue\n");
 				//myexit(0);
@@ -284,11 +286,14 @@ int event_loop()
 				myexit(-1);
 			}
 		}
+		/*成功*/
 		int idx;
+		/*开始遍历*/
 		for (idx = 0; idx < nfds; idx++)
 		{
 			if(events[idx].data.u64==(u64_t)local_listen_fd_tcp)
 			{
+			    /*epoll 错误*/
 				if((events[idx].events & EPOLLERR) !=0 ||(events[idx].events & EPOLLHUP) !=0)
 				{
 					mylog(log_error,"[tcp]EPOLLERR or EPOLLHUP from listen_fd events[idx].events=%x \n",events[idx].events);
@@ -298,7 +303,7 @@ int event_loop()
 				socklen_t tmp_len = sizeof(address_t::storage_t);
 				address_t::storage_t tmp_sockaddr_in={0};
 				memset(&tmp_sockaddr_in,0,sizeof(tmp_sockaddr_in));
-
+                /*还是要本地的tcp去做监听*/
 				int new_fd=accept(local_listen_fd_tcp, (struct sockaddr*) &tmp_sockaddr_in,&tmp_len);
 				if(new_fd<0)
 				{
@@ -323,16 +328,17 @@ int event_loop()
 					continue;
 				}
 
-
+                /*与远程地址建立tco连接*/
 				int new_remote_fd = socket(remote_addr.get_type(), SOCK_STREAM, 0);
 				if(new_remote_fd<0)
 				{
 					mylog(log_fatal,"[tcp]create new_remote_fd failed \n");
 					myexit(1);
 				}
+				/*强制设置发送和接收的缓冲的大小*/
 				set_buf_size(new_remote_fd,socket_buf_size);
 				setnonblocking(new_remote_fd);
-
+                /*连接到远程地址*/
 				ret=connect(new_remote_fd,(struct sockaddr*) &remote_addr.inner,remote_addr.get_len());
 				if(ret!=0)
 				{
@@ -342,7 +348,7 @@ int event_loop()
 				{
 					mylog(log_debug,"[tcp]connect returned 0\n");
 				}
-
+                /*对于在容器中添加类的对象时, 相比于push_back,emplace_back可以避免额外类的复制和移动操作.*/
 				conn_manager_tcp.tcp_pair_list.emplace_back();
 				auto it=conn_manager_tcp.tcp_pair_list.end();
 				it--;

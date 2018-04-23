@@ -239,6 +239,7 @@ static void startserv(int clinfd)
   char* ptype = NULL, *paddr = NULL;//指向请求行中类型和URL字段的指针
   time_t tm= time(NULL); //时间
 
+  /*构造时间*/
   strftime(buf, bufsize, "%Y-%m-%d %R", localtime(&tm));
   //得到客户的IP
   if(getpeername(clinfd, (sockaddr*)&clinaddr, &clinlen) < 0)

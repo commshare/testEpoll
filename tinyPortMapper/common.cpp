@@ -20,7 +20,7 @@ int socket_buf_size=1024*1024;
 struct random_fd_t
 {
 	int random_number_fd;
-	random_fd_t()
+	random_fd_t() /*构造函数*/
 	{
 			random_number_fd=open("/dev/urandom",O_RDONLY);
 
@@ -29,6 +29,7 @@ struct random_fd_t
 				mylog(log_fatal,"error open /dev/urandom\n");
 				myexit(-1);
 			}
+		/*这个也能设置非租塞*/
 			setnonblocking(random_number_fd);
 	}
 	int get_fd()
@@ -36,7 +37,7 @@ struct random_fd_t
 		return random_number_fd;
 	}
 }random_fd;
-
+/*无符号的64位*/
 u64_t get_current_time()//ms
 {
 	timespec tmp_time;
@@ -50,7 +51,7 @@ u64_t get_current_time_us()
 	clock_gettime(CLOCK_MONOTONIC, &tmp_time);
 	return (uint64_t(tmp_time.tv_sec))*1000llu*1000llu+ (uint64_t(tmp_time.tv_nsec))/1000llu;
 }
-
+/*俩32位变为64： a左移32u，加上b */
 u64_t pack_u64(u32_t a,u32_t b)
 {
 	u64_t ret=a;
@@ -58,20 +59,23 @@ u64_t pack_u64(u32_t a,u32_t b)
 	ret+=b;
 	return ret;
 }
+/*获取64位的高32位：直接右移32位，就没有低位了*/
 u32_t get_u64_h(u64_t a)
 {
 	return a>>32u;
 }
+/*左移32u，就没高位了，然后右移32位回来就只剩下低位了*/
 u32_t get_u64_l(u64_t a)
 {
 	return (a<<32u)>>32u;
 }
-
+/*高8位，放在位置0，低八位放在位置1*/
 void write_u16(char * p,u16_t w)
 {
 	*(unsigned char*)(p + 1) = (w & 0xff);
 	*(unsigned char*)(p + 0) = (w >> 8);
 }
+/*p 先读的位置0 作为16位的高位，后读取的位置1，作为低位*/
 u16_t read_u16(char * p)
 {
 	u16_t res;
@@ -79,7 +83,7 @@ u16_t read_u16(char * p)
 	res = *(const unsigned char*)(p + 1) + (res << 8);
 	return res;
 }
-
+/*一个32位写入到p里，32位的高位，放在0位置，看起来p是大端模式？*/
 void write_u32(char * p,u32_t l)
 {
 	*(unsigned char*)(p + 3) = (unsigned char)((l >>  0) & 0xff);
@@ -87,6 +91,7 @@ void write_u32(char * p,u32_t l)
 	*(unsigned char*)(p + 1) = (unsigned char)((l >> 16) & 0xff);
 	*(unsigned char*)(p + 0) = (unsigned char)((l >> 24) & 0xff);
 }
+/*从p里读取，看起来p是大端，所以读出来的0位置作为32位的高位】*/
 u32_t read_u32(char * p)
 {
 	u32_t res;
@@ -184,7 +189,7 @@ void setnonblocking(int sock) {
 	}
 
 }
-
+/*设置发送和接受缓冲的大小*/
 int set_buf_size(int fd,int socket_buf_size,int force_socket_buf)
 {
 	if(force_socket_buf)
@@ -321,7 +326,7 @@ int new_listen_socket(int &fd,u32_t ip,int port)
 
 	return 0;
 }
-
+/*利用epoll实现定时器*/
 int set_timer(int epollfd,int &timer_fd)
 {
 	int ret;

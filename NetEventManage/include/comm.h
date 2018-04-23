@@ -16,11 +16,11 @@ enum class EVENT_TYPE
     EVENT_DB      // database
 };
 // evnet callback
-typedef std::function<void(void*)> EventCallBack;
+typedef std::function<void(void*)> EventCallBack; /*使用std function 声明一个函数*/
 struct EventBase
 {
     int fd; //socket fd,or signo, or timeid
-    EventCallBack callBack; // callback
+    EventCallBack callBack; // callback 回调函数
     void* arg; // arg
 };
 

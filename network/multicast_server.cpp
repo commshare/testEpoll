@@ -18,7 +18,7 @@ int main(void)
 		perror("socket"); 
 		return 0; 
 	}   
-
+	/*待发送的组播地址*/
 	memset(&address, 0, sizeof(address));   
 	address.sin_family = AF_INET;  
 	address.sin_addr.s_addr = inet_addr("224.0.0.1"); 
@@ -29,6 +29,7 @@ int main(void)
 		char buf[200];
 		printf("input your word:>");
 		scanf("%s",buf);
+		/*从udp的socket 向组播地址发送*/
 		if(sendto(server_socket, buf,sizeof(buf), 0,(struct sockaddr *)&address, sizeof(address)) < 0) 
 		{  
 			perror("sendto");  

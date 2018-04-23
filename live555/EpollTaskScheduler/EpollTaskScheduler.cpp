@@ -198,7 +198,9 @@ void EpollTaskScheduler::moveSocketHandling(int oldSocketNum, int newSocketNum) 
 
 const HandlerDescriptor* EpollTaskScheduler::lookupHandlerDescriptor(int socketNum) const {
   HandlerDescriptor* handler;
+  /*这个迭代器是怎么个用法呢?*/
   HandlerIterator iter(*fHandlers);
+  /*使用迭代器遍历*/
   while ((handler = iter.next()) != NULL) {
     if (handler->socketNum == socketNum) break;
   }
